@@ -1,0 +1,127 @@
+---
+title: "Exploring the BRFSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+### Load data
+
+Make sure your data and R Markdown files are in the same directory. When loaded
+your data file will be called `brfss2013`. Delete this note when before you submit 
+your work. 
+
+```{r load-data}
+load("brfss2013.RData")
+```
+
+
+
+* * *
+
+## Part 1: Data
+**what is this data all about? **
+
+  This data is about the general health status and health related problems of US citizens with age above 18yo. This data is representative of the whole US adult population as it was collected by BFRSS from randomly selected adults, the data "brfss2013" contains *330* variables for *491775* patients.
+  
+**what is this data collected for? **
+
+  the data collected under the BRFSS project will serve to monitor trends and draw meaningful insights in order to establish and track state and local health objectives, plan health programs, implement disease prevention and health promotion activities...
+  
+  *******
+
+  Since BRFSS conducts landline telephone and cellular telephone-based surveys. this data is collected in a stratified random sampling and no experiment had been forced, this is an observational study that is generalizable and does not lead to concluding any causality.
+
+
+  
+* * *
+## Part 2: Research questions
+
+**Research quesion 1: **
+  My first research question involves how sleep-time of an adult US citizen might be related to any depressive disorder. In other words, does insomnia has anything to do with depression?
+
+**Research quesion 2:**
+  The next research question involves how smoking habits differ from women to men in the US among adults, and who is more vulnerable to asthma is they are a heavy smoker.
+
+**Research quesion 3:**
+  And finally, the last research question i wanna address is how does diabetes spread change from men to women since diabetes is a very common disease in the US.
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
+button (green button with orange arrow) above. Make sure that your code is visible
+in the project you submit. Delete this note when before you submit your work.
+
+**Research quesion 1:**
+
+```{r}
+vect<- brfss2013 %>%
+  filter(sleptim1<5,!is.na(sleptim1),!is.na(addepev2)) %>%
+  group_by(addepev2) %>%
+  summarise(count=n())
+
+ggplot(data=vect,aes(x=addepev2,y=count))+geom_bar(stat="identity",color='black',fill='blue')+xlab("Depressive disorder for people sleeping less than 5 hours")+ylab("Number of people")
+```
+
+
+
+**from the graph shown**
+  The difference in the number of people having depression and those who don't is not substantial, so there seem to be no correlation between sleep-time and depression, but we can't draw any conclusions since we suspect existence of other factors who might be interfering and leading to this result.
+
+
+**Research quesion 2:**
+
+```{r}
+
+v1 <- brfss2013 %>%
+  filter(smoke100=="Yes",!is.na(asthma3)) %>%
+  group_by(sex) %>%
+  summarise(count=n())
+
+v2 <- brfss2013 %>%
+  filter(smoke100=="Yes",!is.na(asthma3),asthma3=="Yes") %>%
+  group_by(sex,asthma3) %>%
+  summarise(count=n())
+
+ggplot(data=v1,aes(x=sex,y=count))+geom_bar(stat="identity",color='black',fill='brown')+xlab("sex")+ylab("Number of people who smoked >100 cigs")
+
+
+ggplot(data=v2,aes(x=sex,y=count))+geom_bar(stat="identity",color='black',fill='navy')+xlab("smokers by sex")+ylab("Number of people having suffered from asthma")
+
+```
+  
+  
+  **First result : **
+  Looking at the first graph, the result that women are just as heavy smokers as men or even worse is surprising in my point of view, because we often tend to think that men are the ones who smoke a lot.
+  
+  **Second result : **
+  from the second graph, we can notice that women are twice as vulnerable to have asthma than men if they smoked more than a 100 cigarettes, but this might also be related to day-to-day activities such as nature of job and if it involves more physical activity or not.
+
+
+**Research quesion 3:**
+
+```{r}
+v <- brfss2013 %>%
+  filter(diabete3=="Yes",!is.na(sex))%>%
+  group_by(sex)%>%
+  summarise(count=n())
+
+ggplot(data=v,aes(x=sex,y=count))+geom_bar(stat="identity",color='black',fill='green')+xlab("patients by sex")+ylab("Number of people diagnosed with diabetes")
+
+```
+
+
+**From the bar graph**, we can clearly see that the number females having diabetes is higher than the number for men. From this visualization, we can , to a certain extent say that, female in the US are more likely to have diabetes than men by a not so substantial difference. However, this is only deducted from the data collected by BRFSS. generalizing it to the whole population can be influenced by many external factors.
